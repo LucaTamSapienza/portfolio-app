@@ -1,65 +1,164 @@
-import Image from "next/image";
+"use client";
+
+import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
+import { motion, AnimatePresence } from "framer-motion";
+import { PortfolioNode } from "@/data/portfolio";
+import { useScrollSection } from "@/hooks/useScrollSection";
+import { useKonamiCode } from "@/hooks/useKonamiCode";
+import { SectionNav } from "@/components/UI/SectionNav";
+import { DetailPanel } from "@/components/UI/DetailPanel";
+import { ContactSection } from "@/components/UI/ContactSection";
+import { Header } from "@/components/UI/Header";
+import { SearchBar } from "@/components/Search/SearchBar";
+import { Terminal } from "@/components/UI/Terminal";
+import { TerminalTrigger } from "@/components/UI/TerminalTrigger";
+
+// Dynamically import the 3D scene (no SSR)
+const Scene = dynamic(
+  () => import("@/components/NeuralNetwork/Scene").then((m) => ({ default: m.Scene })),
+  { ssr: false, loading: () => null }
+);
+
+const SECTION_NAMES = ["About", "Experience", "Projects", "Open Source", "Skills", "Contact"];
+const SECTION_DESCRIPTIONS: Record<number, string> = {
+  0: "Computer Engineer & AI Researcher",
+  1: "Where I've worked & contributed",
+  2: "Things I've built",
+  3: "Open source footprint",
+  4: "Technologies & tools",
+  5: "Get in touch",
+};
 
 export default function Home() {
+  const { section, scrollToSection, sectionCount } = useScrollSection();
+  const [selectedNode, setSelectedNode] = useState<PortfolioNode | null>(null);
+  const [highlightedNodeIds, setHighlightedNodeIds] = useState<Set<string> | null>(null);
+  const [konamiActive, setKonamiActive] = useState(false);
+  const [terminalOpen, setTerminalOpen] = useState(false);
+
+  const handleNodeClick = useCallback((node: PortfolioNode) => {
+    setSelectedNode((prev) => (prev?.id === node.id ? null : node));
+  }, []);
+
+  const handleNodeHover = useCallback((_nodeId: string | null) => {
+    // hover state handled inside NodeMesh
+  }, []);
+
+  const handleHighlightChange = useCallback((nodeIds: Set<string> | null) => {
+    setHighlightedNodeIds(nodeIds);
+  }, []);
+
+  const handleSearchNodeSelect = useCallback((node: PortfolioNode) => {
+    setSelectedNode(node);
+  }, []);
+
+  const handleCloseDetail = useCallback(() => {
+    setSelectedNode(null);
+  }, []);
+
+  useKonamiCode(
+    useCallback(() => {
+      setKonamiActive(true);
+      setTimeout(() => setKonamiActive(false), 3000);
+    }, [])
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <>
+      {/* Virtual scroll spacer — drives section transitions */}
+      <div style={{ height: `${sectionCount * 100}vh` }} aria-hidden />
+
+      {/* Fixed 3D canvas */}
+      <Scene
+        activeSection={section}
+        highlightedNodeIds={highlightedNodeIds}
+        selectedNodeId={selectedNode?.id ?? null}
+        onNodeClick={handleNodeClick}
+        onNodeHover={handleNodeHover}
+      />
+
+      {/* Header */}
+      <Header />
+
+      {/* Search bar */}
+      <SearchBar
+        onHighlightChange={handleHighlightChange}
+        onNodeSelect={handleSearchNodeSelect}
+      />
+
+      {/* Section label */}
+      <motion.div
+        className="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 text-center pointer-events-none"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2 }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={section}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {section !== 5 && (
+              <>
+                <p className="text-[11px] font-mono text-slate-600 uppercase tracking-[0.2em]">
+                  {SECTION_NAMES[section]}
+                </p>
+                <p className="text-xs text-slate-700 mt-0.5">{SECTION_DESCRIPTIONS[section]}</p>
+              </>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Section nav */}
+      <SectionNav activeSection={section} onSectionClick={scrollToSection} />
+
+      {/* Node detail panel */}
+      <DetailPanel
+        node={selectedNode}
+        onClose={handleCloseDetail}
+        onNodeSelect={handleNodeClick}
+      />
+
+      {/* Contact section overlay */}
+      <ContactSection visible={section === 5} />
+
+      {/* Terminal easter egg */}
+      <TerminalTrigger onClick={() => setTerminalOpen(true)} />
+      <Terminal isOpen={terminalOpen} onClose={() => setTerminalOpen(false)} />
+
+      {/* Konami code flash */}
+      <AnimatePresence>
+        {konamiActive && (
+          <motion.div
+            className="fixed inset-0 z-50 pointer-events-none"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: [0, 0.3, 0, 0.2, 0] }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, times: [0, 0.1, 0.3, 0.5, 1] }}
+            style={{ background: "radial-gradient(ellipse at center, rgba(0,240,255,0.4) 0%, transparent 70%)" }}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Toast for konami */}
+      <AnimatePresence>
+        {konamiActive && (
+          <motion.div
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 glass rounded-xl px-4 py-2.5 border border-[#00f0ff]/30"
+            initial={{ opacity: 0, y: -10, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.9 }}
+            style={{ boxShadow: "0 0 30px rgba(0,240,255,0.2)" }}
           >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+            <p className="text-xs font-mono text-[#00f0ff]">⚡ Neural network activated</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
