@@ -8,9 +8,9 @@ import { PortfolioNode } from "@/data/portfolio";
 
 type NodeState = "default" | "highlighted" | "dimmed" | "selected" | "connected";
 
-const CYAN = new THREE.Color("#00f0ff");
-const CYAN_BRIGHT = new THREE.Color("#80f8ff");
-const WHITE = new THREE.Color("#ffffff");
+const NODE_COLOR = new THREE.Color("#5eead4");       // teal-300 — soft, muted
+const NODE_BRIGHT = new THREE.Color("#99f6e4");      // teal-200 — gentle highlight
+const NODE_SELECTED = new THREE.Color("#2dd4bf");    // teal-400 — richer for selected
 
 interface NodeMeshProps {
   node: PortfolioNode;
@@ -35,33 +35,33 @@ export function NodeMesh({ node, position, state, onClick, onHover }: NodeMeshPr
 
     let targetScale = baseSize * breathe;
     let targetOpacity = 1;
-    let targetEmissive = 0.6;
-    let targetColor = CYAN;
+    let targetEmissive = 0.3;
+    let targetColor = NODE_COLOR;
 
     switch (state) {
       case "selected":
         targetScale = baseSize * 1.5 * breathe;
-        targetEmissive = 3.0;
-        targetColor = CYAN_BRIGHT;
+        targetEmissive = 1.2;
+        targetColor = NODE_SELECTED;
         break;
       case "connected":
         targetScale = baseSize * 1.2 * breathe;
-        targetEmissive = 1.5;
-        targetColor = CYAN;
+        targetEmissive = 0.6;
+        targetColor = NODE_COLOR;
         break;
       case "highlighted":
         targetScale = baseSize * 1.3 * breathe;
-        targetEmissive = 2.0;
-        targetColor = CYAN_BRIGHT;
+        targetEmissive = 0.8;
+        targetColor = NODE_BRIGHT;
         break;
       case "dimmed":
-        targetOpacity = 0.12;
-        targetEmissive = 0.1;
+        targetOpacity = 0.15;
+        targetEmissive = 0.05;
         break;
       case "default":
       default:
-        targetEmissive = hovered.current ? 1.8 : 0.6;
-        targetColor = hovered.current ? CYAN_BRIGHT : CYAN;
+        targetEmissive = hovered.current ? 0.7 : 0.3;
+        targetColor = hovered.current ? NODE_BRIGHT : NODE_COLOR;
         targetScale = hovered.current ? baseSize * 1.2 : baseSize * breathe;
     }
 
@@ -83,14 +83,14 @@ export function NodeMesh({ node, position, state, onClick, onHover }: NodeMeshPr
         onPointerOver={(e) => { e.stopPropagation(); hovered.current = true; onHover(true); document.body.style.cursor = "pointer"; }}
         onPointerOut={() => { hovered.current = false; onHover(false); document.body.style.cursor = "auto"; }}
       >
-        <icosahedronGeometry args={[1, 1]} />
+        <sphereGeometry args={[1, 32, 32]} />
         <meshStandardMaterial
           ref={matRef}
-          color={CYAN}
-          emissive={CYAN}
-          emissiveIntensity={0.6}
-          roughness={0.2}
-          metalness={0.8}
+          color={NODE_COLOR}
+          emissive={NODE_COLOR}
+          emissiveIntensity={0.3}
+          roughness={0.35}
+          metalness={0.6}
           transparent
           opacity={1}
         />

@@ -19,7 +19,7 @@ interface SectionNavProps {
 export function SectionNav({ activeSection, onSectionClick }: SectionNavProps) {
   return (
     <motion.nav
-      className="fixed right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-3"
+      className="fixed right-6 top-1/2 -translate-y-1/2 z-40 flex flex-col gap-2"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       transition={{ delay: 1, duration: 0.6 }}
@@ -30,23 +30,24 @@ export function SectionNav({ activeSection, onSectionClick }: SectionNavProps) {
           <button
             key={section.index}
             onClick={() => onSectionClick(section.index)}
-            className="group relative flex items-center justify-end gap-2"
+            className="group relative flex items-center justify-end gap-3 py-1"
             aria-label={section.label}
           >
             {/* Label */}
-            <span className="text-[11px] font-mono text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+            <span className="text-xs font-mono text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
               {section.label}
             </span>
 
             {/* Dot */}
-            <div className="relative w-5 h-5 flex items-center justify-center">
+            <div className="relative w-7 h-7 flex items-center justify-center">
               <motion.div
-                className="rounded-full bg-[#00f0ff]"
+                className="rounded-full"
                 animate={{
-                  width: isActive ? 8 : 4,
-                  height: isActive ? 8 : 4,
-                  opacity: isActive ? 1 : 0.3,
-                  boxShadow: isActive ? "0 0 10px #00f0ff" : "none",
+                  width: isActive ? 12 : 7,
+                  height: isActive ? 12 : 7,
+                  opacity: isActive ? 1 : 0.4,
+                  backgroundColor: isActive ? "#5eead4" : "#94a3b8",
+                  boxShadow: isActive ? "0 0 12px rgba(94,234,212,0.5)" : "none",
                 }}
                 transition={{ duration: 0.3 }}
               />

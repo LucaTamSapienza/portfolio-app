@@ -36,15 +36,15 @@ export function EdgeLines({
 
         if (selectedNodeId) {
           if (edge.source === selectedNodeId || edge.target === selectedNodeId) {
-            opacity = 0.5 + edge.strength * 0.4;
+            opacity = 0.35 + edge.strength * 0.3;
           } else {
-            opacity = 0.02;
+            opacity = 0.03;
           }
         } else if (highlightedNodeIds) {
           if (highlightedNodeIds.has(edge.source) && highlightedNodeIds.has(edge.target)) {
-            opacity = 0.4 + edge.strength * 0.3;
+            opacity = 0.25 + edge.strength * 0.2;
           } else {
-            opacity = 0.015;
+            opacity = 0.03;
           }
         }
 
